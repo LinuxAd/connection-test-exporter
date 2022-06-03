@@ -9,3 +9,28 @@ For now it just connects by default to bbc.co.uk, and writes a log to a director
 ```bash
 go build
 ```
+
+# Run
+
+```bash
+PS C:\Users\point\Documents\Development\connection-test> connection-test 
+[info] 2022/06/03 10:08:18.456512 main.go:108: script invoked using log file: C:\Users\point\connection-tests\Fri-3-Jun-2022.log
+[info] 2022/06/03 10:08:18.666002 main.go:55: 👍 Connection to https://bbc.co.uk was a success, status code: 200
+[info] 2022/06/03 10:08:20.795040 main.go:55: 👍 Connection to https://bbc.co.uk was a success, status code: 200
+[info] 2022/06/03 10:08:22.844687 main.go:55: 👍 Connection to https://bbc.co.uk was a success, status code: 200
+[info] 2022/06/03 10:08:24.896820 main.go:55: 👍 Connection to https://bbc.co.uk was a success, status code: 200
+[info] 2022/06/03 10:08:26.949276 main.go:55: 👍 Connection to https://bbc.co.uk was a success, status code: 200
+```
+
+Example log output:
+```Text
+[error] 2022/06/03 00:48:00.811478 main.go:46: Get "https://bbc.co.uk": dial tcp: lookup bbc.co.uk: no such host
+[error] 2022/06/03 00:48:00.811478 main.go:55: 😡 Connection to https://bbc.co.uk was a fail, response nil
+[error] 2022/06/03 00:48:09.872935 main.go:46: Get "https://bbc.co.uk": dial tcp: lookup bbc.co.uk: no such host
+[error] 2022/06/03 00:48:09.872935 main.go:55: 😡 Connection to https://bbc.co.uk was a fail, response nil
+[error] 2022/06/03 00:48:11.879708 main.go:46: Get "https://bbc.co.uk": dial tcp: lookup bbc.co.uk: no such host
+[error] 2022/06/03 00:48:11.879708 main.go:55: 😡 Connection to https://bbc.co.uk was a fail, response nil
+[info] 2022/06/03 10:08:18.456512 main.go:108: script invoked using log file: C:\Users\point\connection-tests\Fri-3-Jun-2022.log
+[info] 2022/06/03 10:08:18.666002 main.go:55: 👍 Connection to https://bbc.co.uk was a success, status code: 200
+[info] 2022/06/03 10:08:20.795040 main.go:55: 👍 Connection to https://bbc.co.uk was a success, status code: 200
+```
