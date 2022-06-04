@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/enescakir/emoji"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 const (
@@ -33,26 +33,6 @@ func openLogFile(path string) (io.Writer, error) {
 	mw := io.MultiWriter(os.Stdout, logFile)
 
 	return mw, err
-}
-
-func connTest(url string) {
-	status := "fail"
-	e := emoji.Parse(":rage:")
-	suf := "response nil"
-	log := errorLogger
-
-	resp, err := http.Get(url)
-	if err != nil {
-		errorLogger.Println(err)
-	}
-	if resp != nil {
-		status = "success"
-		suf = fmt.Sprintf("status code: %d", resp.StatusCode)
-		e = emoji.Parse(":+1:")
-		log = infoLogger
-	}
-
-	log.Printf("%v Connection to %s was a %s, %s", e, url, status, suf)
 }
 
 func logInit() *string {
@@ -81,6 +61,17 @@ func logInit() *string {
 	return &final
 }
 
+func testConnection(URL string) {
+	// Set up loop to run test
+	go func(URL string) {
+		for {
+			connTest(URL)
+			time.Sleep(time.Duration(interval) * time.Second)
+		}
+	}(URL)
+
+}
+
 func main() {
 
 	// Parse flags
@@ -107,10 +98,9 @@ func main() {
 	// Add line to log for each time the program is run
 	infoLogger.Printf("script invoked using log file: %s", *file)
 
-	// Set up loop to run test
-	for {
-		connTest(*URL)
-		time.Sleep(time.Duration(interval) * time.Second)
-	}
+	testConnection(*URL)
+
+	http.Handle("/metrics", promhttp.Handler())
+	http.ListenAndServe(":2112", nil)
 
 }
