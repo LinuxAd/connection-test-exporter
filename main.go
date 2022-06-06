@@ -25,17 +25,10 @@ var (
 )
 
 func openLogFile(path string) (io.Writer, error) {
-	logFile, err := os.OpenFile(path, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0644)
-	if err != nil {
-		return nil, err
-	}
-
-	mw := io.MultiWriter(os.Stdout, logFile)
-
-	return mw, err
+	return os.OpenFile(path, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0770)
 }
 
-func logInit() *string {
+func logDirInit() *string {
 	// Find home directory
 	x, err := os.UserHomeDir()
 	if err != nil {
@@ -76,31 +69,49 @@ func main() {
 
 	// Parse flags
 	flag.IntVar(&interval, "interval", 2, "Time between test connections.")
+	addr := flag.String("addr", ":80", "The address to expose the metrics on.")
 	URL := flag.String("url", "https://bbc.co.uk", "The URL to test.")
-	file := flag.String("log", defaultLog, "The file to log to.")
+	logBool := flag.Bool("log", false, "Whether to log to file or not.")
+	file := flag.String("logfile", defaultLog, "The file to log to.")
 	flag.Parse()
 
-	// if a different path hasn't been set, compute the default path
-	if *file == defaultLog {
-		file = logInit()
+	logDests := []io.Writer{os.Stdout}
+
+	if *logBool {
+		// if a different path hasn't been set, compute the default path
+		if *file == defaultLog {
+			file = logDirInit()
+		}
+
+		// Open the log file for writing
+		logFile, err := openLogFile(*file)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		logDests = append(logDests, logFile)
 	}
 
-	// Open the log file for writing
-	logFile, err := openLogFile(*file)
-	if err != nil {
-		log.Fatal(err)
+	logOut := io.MultiWriter(logDests...)
+
+	if *logBool {
+		// Add line to log for each time the program is run
+		infoLogger.Printf("script invoked using log file: %s", *file)
 	}
 
 	// Set up loggers for error and info
-	infoLogger = log.New(logFile, "[info] ", log.LstdFlags|log.Lshortfile|log.Lmicroseconds)
-	errorLogger = log.New(logFile, "[error] ", log.LstdFlags|log.Lshortfile|log.Lmicroseconds)
+	infoLogger = log.New(logOut, "[info] ", log.LstdFlags|log.Lshortfile|log.Lmicroseconds)
+	errorLogger = log.New(logOut, "[error] ", log.LstdFlags|log.Lshortfile|log.Lmicroseconds)
 
-	// Add line to log for each time the program is run
-	infoLogger.Printf("script invoked using log file: %s", *file)
+	infoLogger.Printf("metrics available on: %v", *addr)
+
+	connectionInterval.Set(float64(interval))
 
 	testConnection(*URL)
 
 	http.Handle("/metrics", promhttp.Handler())
-	http.ListenAndServe(":2112", nil)
+	log.Fatal(
+		http.ListenAndServe(*addr, nil),
+	)
 
 }

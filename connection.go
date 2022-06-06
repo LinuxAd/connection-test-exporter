@@ -5,15 +5,6 @@ import (
 	"net/http"
 
 	"github.com/enescakir/emoji"
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
-)
-
-var (
-	connectionSuccesses = promauto.NewCounter(prometheus.CounterOpts{
-		Name: "connection_tests_succeeded",
-		Help: "The total number of successful connection attempts.",
-	})
 )
 
 func connTest(url string) {
@@ -22,12 +13,15 @@ func connTest(url string) {
 	suf := "response nil"
 	log := errorLogger
 
+	connectionAttempts.Inc()
 	resp, err := http.Get(url)
 	if err != nil {
 		errorLogger.Println(err)
+		lastConnectionSuccessful.Set(0)
 	}
 	if resp != nil {
 		connectionSuccesses.Inc()
+		lastConnectionSuccessful.Set(1)
 		status = "success"
 		suf = fmt.Sprintf("status code: %d", resp.StatusCode)
 		e = emoji.Parse(":+1:")
