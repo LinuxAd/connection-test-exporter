@@ -2,15 +2,21 @@
 
 A quick utility I wrote to test my internet connection, and record a log of when it was up or down.
 
-For now it just connects by default to bbc.co.uk, and writes a log to a directory in your home folder. It should work on all platforms supported by the go compiler, but has only been tested on Windows 10 for now, as that's the PC I have that's connected by ethernet directly to my home router.
+*** Now with prometheus metrics support! ***
 
-# Build
+By default it attempts to connect by default to bbc.co.uk, and will export a number of metrics to prometheus as it does so, along with writing out some cool output to your terminal. It can also write a log to a directory in your home folder. It should work on all platforms supported by the go compiler, but has only been tested on Windows 10 for now, as that's the PC I have that's connected by ethernet directly to my home router.
+
+## Build
 
 ```bash
 go build
 ```
 
-# Run
+## Requires
+
+Some kind of emoji font installed because I like being able to spot the dropped connections at a glance in the output.
+
+## Run
 
 ```bash
 PS C:\Users\point\Documents\Development\connection-test> connection-test 
@@ -34,3 +40,9 @@ Example log output:
 [info] 2022/06/03 10:08:18.666002 main.go:55: 👍 Connection to https://bbc.co.uk was a success, status code: 200
 [info] 2022/06/03 10:08:20.795040 main.go:55: 👍 Connection to https://bbc.co.uk was a success, status code: 200
 ```
+
+## FAQs
+
+### Why not just use the blackbox exporter?
+
+Good question - because I wanted to write something myself.
