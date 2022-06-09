@@ -7,9 +7,14 @@ import (
 	"github.com/enescakir/emoji"
 )
 
+const (
+	emojiBad  = ":rage:"
+	emojiGood = ":+1:"
+)
+
 func connTest(url string) {
 	status := "fail"
-	e := emoji.Parse(":rage:")
+	e := emoji.Parse(emojiBad)
 	suf := "response nil"
 	log := errorLogger
 
@@ -24,7 +29,7 @@ func connTest(url string) {
 		lastConnectionSuccessful.Set(1)
 		status = "success"
 		suf = fmt.Sprintf("status code: %d", resp.StatusCode)
-		e = emoji.Parse(":+1:")
+		e = emoji.Parse(emojiGood)
 		log = infoLogger
 	}
 
